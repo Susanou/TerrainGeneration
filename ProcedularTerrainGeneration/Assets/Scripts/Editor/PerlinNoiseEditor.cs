@@ -5,8 +5,8 @@ using UnityEngine;
 public class PerlinNoiseEditor : Editor
 {
 
-    string path;
-    string name;
+    string path = "Textures";
+    string filename;
 
     public override void OnInspectorGUI()
     {
@@ -21,12 +21,17 @@ public class PerlinNoiseEditor : Editor
 
         EditorGUILayout.BeginHorizontal();
         GUILayout.Label("FileName");
-        name = GUILayout.TextField(name, GUILayout.Width(200));
+        filename = GUILayout.TextField(filename, GUILayout.Width(200));
         EditorGUILayout.EndHorizontal();    
 
         if(GUILayout.Button("Generate Noise"))
         {
             noise.GenerateTexture();
+        }
+
+        if(GUILayout.Button("Generate Random Noise"))
+        {
+            noise.RandomOffsets();
         }
 
         if(GUILayout.Button("Reset"))
@@ -37,7 +42,7 @@ public class PerlinNoiseEditor : Editor
         if(GUILayout.Button("Save texture"))
         {
             Debug.Log(Application.dataPath + "/" + path);
-            noise.SaveTexture(path, name);
+            noise.SaveTexture(path, filename);
         }
     }
 }

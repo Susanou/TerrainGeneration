@@ -25,7 +25,7 @@ public class PerlinNoise : MonoBehaviour
 
     void Update()
     {   
-        //renderer.material.mainTexture = GenerateTexture();
+        GenerateTexture();
     }
 
     public void GenerateTexture()
@@ -49,9 +49,19 @@ public class PerlinNoise : MonoBehaviour
         currentTexture = texture;
     }
 
+    public void RandomOffsets()
+    {
+        offsetX = Random.Range(0f, 99999f);
+        offsetY = Random.Range(0f, 99999f);
+        GenerateTexture();
+    }
+
     public void ResetTexture()
     {
         GetComponent<Renderer>().sharedMaterial.mainTexture = originalTexture;
+        offsetX = 100f;
+        offsetY = 100f;
+        scale = 20.0f;
     }
 
     public void SaveTexture(string path, string name)
