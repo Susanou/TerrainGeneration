@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.IO;
 
 public class PerlinNoise : MonoBehaviour
 {
@@ -11,6 +12,7 @@ public class PerlinNoise : MonoBehaviour
     public float scale = 20.0f;
 
     private Texture2D originalTexture;
+    private Texture2D currentTexture;
 
     void Start()
     {
@@ -28,7 +30,7 @@ public class PerlinNoise : MonoBehaviour
 
     public void GenerateTexture()
     {
-        Texture2D texture = new Texture2D(width, height);
+        Texture2D texture = new Texture2D(width, height, TextureFormat.RGB24, false);
         
         //Generate Perlin Noise map for texture
 
@@ -44,11 +46,23 @@ public class PerlinNoise : MonoBehaviour
         texture.Apply();
 
         GetComponent<Renderer>().sharedMaterial.mainTexture = texture;
+        currentTexture = texture;
     }
 
     public void ResetTexture()
     {
         GetComponent<Renderer>().sharedMaterial.mainTexture = originalTexture;
+    }
+
+    public void SaveTexture(string path, string name)
+    {
+
+        byte[] bytes = ImageConversion.EncodeToPNG(currentTexture);
+        var dirPath = Application.dataPath + "/" + path + "/";
+        if(!Directory.Exists(dirPath)) {
+            Directory.CreateDirectory(dirPath);
+        }
+        File.WriteAllBytes(dirPath + name + ".png", bytes);
     }
 
     Color CalculateColor(int x, int y)
