@@ -11,6 +11,8 @@ public class PerlinNoise : MonoBehaviour
 
     public float scale = 20.0f;
 
+    public bool autoUpdate;
+
     private Texture2D originalTexture;
     private Texture2D currentTexture;
 

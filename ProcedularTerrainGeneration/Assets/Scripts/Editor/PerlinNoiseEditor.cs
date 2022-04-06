@@ -6,13 +6,24 @@ public class PerlinNoiseEditor : Editor
 {
 
     string path = "Textures";
-    string filename;
+    string filename = "PerlinMap";
+
+
 
     public override void OnInspectorGUI()
     {
         base.OnInspectorGUI();
 
         PerlinNoise noise = (PerlinNoise)target;
+
+        if(DrawDefaultInspector()) {
+            if(noise.autoUpdate)
+            {
+                noise.GenerateTexture();
+            }
+        }
+
+        
 
         EditorGUILayout.BeginHorizontal();
         GUILayout.Label("Path");
