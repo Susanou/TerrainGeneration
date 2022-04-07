@@ -25,4 +25,10 @@ public class MapDisplay : MonoBehaviour
         meshFilter.sharedMesh = meshData.CreateMesh();
         meshRenderer.sharedMaterial.mainTexture = texture;
     }
+
+    public void HideAll()
+    {
+        meshFilter.gameObject.SetActive(false);
+        textureRender.gameObject.SetActive(false);
+    }
 }

@@ -7,6 +7,7 @@ public class MapGenerator : MonoBehaviour
 
     public enum DrawMode
     {
+        HideAll,
         NoiseMap,
         ColorMap,
         DrawMesh
@@ -14,7 +15,8 @@ public class MapGenerator : MonoBehaviour
 
     public DrawMode drawMode;
 
-    const int mapChunkSize = 241; //max possible would be 255 but 241 is better because increment is a factor of w-1 and 240 has a lot of factors that are easy to work with
+    [HideInInspector]
+    public const int mapChunkSize = 241; //max possible would be 255 but 241 is better because increment is a factor of w-1 and 240 has a lot of factors that are easy to work with
     [Range(0,6)]
     public int levelOfDetail; //we will multiply by 2 to get the increments (240 is divisible by all even numbers up to 12)
     public float noiseScale;
@@ -72,6 +74,10 @@ public class MapGenerator : MonoBehaviour
         {        
             display.DrawMesh(MeshGenerator.GenerateTerrainMesh(noiseMap, meshHeightMultiplier, meshHeightCurve, levelOfDetail), 
                                                                 TextureGenerator.TextureFromColorMap(colorMap, mapChunkSize, mapChunkSize));
+        }
+        else if(drawMode == DrawMode.HideAll)
+        {
+            display.HideAll();
         }
     }
 
