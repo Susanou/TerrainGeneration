@@ -5,9 +5,9 @@ using UnityEngine;
 public static class Noise
 {
 
-    public static float[,] GenerateNoiseMap(int mapWidth, int mapHeight, int seed, float scale, int octaves, float persistance, float lacunarity, Vector2 offset)
+    public static float[,] GenerateNoiseMap(int mapChunkSize, int seed, float scale, int octaves, float persistance, float lacunarity, Vector2 offset)
     {
-        float[,] noiseMap = new float[mapWidth, mapHeight];
+        float[,] noiseMap = new float[mapChunkSize, mapChunkSize];
 
         //random sampling of maps so we can recover them if needed
         System.Random prng = new System.Random(seed);
@@ -28,13 +28,13 @@ public static class Noise
         float maxNoiseHeight = float.MinValue;
         float minNoiseHeight = float.MaxValue;
 
-        float halfWidth = mapWidth / 2f;
-        float halfHeight = mapHeight / 2f;
+        float halfWidth = mapChunkSize / 2f;
+        float halfHeight = mapChunkSize / 2f;
 
 
-        for (int y = 0; y < mapHeight; y++)
+        for (int y = 0; y < mapChunkSize; y++)
         {
-            for(int x = 0; x < mapWidth; x++)
+            for(int x = 0; x < mapChunkSize; x++)
             {
 
                 float amplitude = 1.0f;
@@ -60,9 +60,9 @@ public static class Noise
         }
 
         //Normalization step
-        for (int y = 0; y < mapHeight; y++)
+        for (int y = 0; y < mapChunkSize; y++)
         {
-            for(int x = 0; x < mapWidth; x++)
+            for(int x = 0; x < mapChunkSize; x++)
             {
                 noiseMap[x, y] = Mathf.InverseLerp(minNoiseHeight, maxNoiseHeight, noiseMap[x, y]);
             }
