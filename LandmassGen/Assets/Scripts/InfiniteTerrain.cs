@@ -5,102 +5,105 @@ using UnityEngine;
 
 public class InfiniteTerrain : MonoBehaviour
 {
-    public const float maxViewDist = 450;
-    public Transform viewer;
+public const float maxViewDst = 450;
+	public Transform viewer;
+	public Material mapMaterial;
 
-    public static Vector2 viewerPosition;
-    int chunkSize;
-    int chunksInViewDist;
+	public static Vector2 viewerPosition;
+	static MapGenerator mapGenerator;
+	int chunkSize;
+	int chunksVisibleInViewDst;
 
-    Dictionary<Vector2, TerrainChunk> terrainChunkDict = new Dictionary<Vector2, TerrainChunk>();
-    List<TerrainChunk> chunksVisiblePrevUpdate = new List<TerrainChunk>();
+	Dictionary<Vector2, TerrainChunk> terrainChunkDictionary = new Dictionary<Vector2, TerrainChunk>();
+	List<TerrainChunk> terrainChunksVisibleLastUpdate = new List<TerrainChunk>();
 
-    void Start()
-    {
-        chunkSize = MapGenerator.mapChunkSize- 1;
-        chunksInViewDist = Mathf.RoundToInt(maxViewDist / chunkSize);
-    }
+	void Start() {
+		mapGenerator = FindObjectOfType<MapGenerator> ();
+		chunkSize = MapGenerator.mapChunkSize - 1;
+		chunksVisibleInViewDst = Mathf.RoundToInt(maxViewDst / chunkSize);
+	}
 
-    void Update()
-    {
-        viewerPosition = new Vector2(viewer.position.x, viewer.position.z);
-        UpdateVisibleChunks();
-    }
+	void Update() {
+		viewerPosition = new Vector2 (viewer.position.x, viewer.position.z);
+		UpdateVisibleChunks ();
+	}
+		
+	void UpdateVisibleChunks() {
 
-    void UpdateVisibleChunks()
-    {
+		for (int i = 0; i < terrainChunksVisibleLastUpdate.Count; i++) {
+			terrainChunksVisibleLastUpdate [i].SetVisible (false);
+		}
+		terrainChunksVisibleLastUpdate.Clear ();
+			
+		int currentChunkCoordX = Mathf.RoundToInt (viewerPosition.x / chunkSize);
+		int currentChunkCoordY = Mathf.RoundToInt (viewerPosition.y / chunkSize);
 
-        foreach(TerrainChunk chunk in chunksVisiblePrevUpdate)
-        {
-            chunk.SetVisible(false);
-        }
-        chunksVisiblePrevUpdate.Clear();
+		for (int yOffset = -chunksVisibleInViewDst; yOffset <= chunksVisibleInViewDst; yOffset++) {
+			for (int xOffset = -chunksVisibleInViewDst; xOffset <= chunksVisibleInViewDst; xOffset++) {
+				Vector2 viewedChunkCoord = new Vector2 (currentChunkCoordX + xOffset, currentChunkCoordY + yOffset);
 
+				if (terrainChunkDictionary.ContainsKey (viewedChunkCoord)) {
+					terrainChunkDictionary [viewedChunkCoord].UpdateTerrainChunk ();
+					if (terrainChunkDictionary [viewedChunkCoord].IsVisible ()) {
+						terrainChunksVisibleLastUpdate.Add (terrainChunkDictionary [viewedChunkCoord]);
+					}
+				} else {
+					terrainChunkDictionary.Add (viewedChunkCoord, new TerrainChunk (viewedChunkCoord, chunkSize, transform, mapMaterial));
+				}
 
-        int currentChunkCoordX = Mathf.RoundToInt(viewerPosition.x / chunkSize);
-        int currentChunkCoordY = Mathf.RoundToInt(viewerPosition.y / chunkSize);
+			}
+		}
+	}
 
-        for (int yOffset = -chunksInViewDist; yOffset <= chunksInViewDist; yOffset++)
-        {
-            for (int xOffset = -chunksInViewDist; xOffset <= chunksInViewDist; xOffset++)
-            {
-                Vector2 viewedChunkCoord = new Vector2(currentChunkCoordX + xOffset, currentChunkCoordY + yOffset);
+	public class TerrainChunk {
 
-                if (terrainChunkDict.ContainsKey(viewedChunkCoord)) {
-                    terrainChunkDict[viewedChunkCoord].UpdateTerrainChunk();
+		GameObject meshObject;
+		Vector2 position;
+		Bounds bounds;
 
-                    if(terrainChunkDict[viewedChunkCoord].isVisible())
-                    {
-                        chunksVisiblePrevUpdate.Add(terrainChunkDict[viewedChunkCoord]);
-                    }
-
-                }
-                else{
-                    terrainChunkDict.Add(viewedChunkCoord, new TerrainChunk(viewedChunkCoord, chunkSize,    transform));
-                }
-
-            }
-        }
-    }
+		MeshRenderer meshRenderer;
+		MeshFilter meshFilter;
 
 
-    public class TerrainChunk 
-    {
-        GameObject meshObject;
-        Vector2 position;
-        Bounds bounds;
+		public TerrainChunk(Vector2 coord, int size, Transform parent, Material material) {
+			position = coord * size;
+			bounds = new Bounds(position,Vector2.one * size);
+			Vector3 positionV3 = new Vector3(position.x,0,position.y);
 
-        public TerrainChunk(Vector2 coords, int size, Transform parent)
-        {
-            position = coords * size;
-            Vector3 position3D = new Vector3(position.x, 0, position.y);
+			meshObject = new GameObject("Terrain Chunk");
+			meshRenderer = meshObject.AddComponent<MeshRenderer>();
+			meshFilter = meshObject.AddComponent<MeshFilter>();
+			meshRenderer.material = material;
 
-            bounds = new Bounds(position, Vector2.one * size);
+			meshObject.transform.position = positionV3;
+			meshObject.transform.parent = parent;
+			SetVisible(false);
 
-            meshObject = GameObject.CreatePrimitive(PrimitiveType.Plane);
-            meshObject.transform.position = position3D;
-            meshObject.transform.localScale = Vector3.one * size / 10f; // default scale is 10 so just divide by that to get back into our own
-            meshObject.transform.parent = parent;
-            SetVisible(false);
-        }
+			mapGenerator.RequestMapData(OnMapDataReceived);
+		}
 
-        public void UpdateTerrainChunk()
-        {
-            float viewerDistFromChunk = Mathf.Sqrt(bounds.SqrDistance(viewerPosition));
+		void OnMapDataReceived(MapData mapData) {
+			mapGenerator.RequestMeshData (mapData, OnMeshDataReceived);
+		}
 
-            bool visible = viewerDistFromChunk <= maxViewDist;
-            SetVisible(visible);
-        }
+		void OnMeshDataReceived(MeshData meshData) {
+			meshFilter.mesh = meshData.CreateMesh ();
+		}
 
-        public void SetVisible(bool visible)
-        {
-            meshObject.SetActive(visible);
-        }
 
-        public bool isVisible()
-        {
-            return meshObject.activeSelf;
-        }
+		public void UpdateTerrainChunk() {
+			float viewerDstFromNearestEdge = Mathf.Sqrt(bounds.SqrDistance (viewerPosition));
+			bool visible = viewerDstFromNearestEdge <= maxViewDst;
+			SetVisible (visible);
+		}
 
-    }
+		public void SetVisible(bool visible) {
+			meshObject.SetActive (visible);
+		}
+
+		public bool IsVisible() {
+			return meshObject.activeSelf;
+		}
+
+	}
 }
