@@ -4,7 +4,7 @@ using UnityEngine;
 
 public static class MeshGenerator
 {
-    public static MeshData GenerateTerrainMesh(float[,] heightMap, float heightMultiplier, AnimationCurve _heightCurve, int levelOfDetail)
+    public static MeshData GenerateTerrainMesh(float[,] heightMap, float heightMultiplier, AnimationCurve _heightCurve, int editorLODPreview)
     {
 
         AnimationCurve heightCurve = new AnimationCurve(_heightCurve.keys);
@@ -15,7 +15,7 @@ public static class MeshGenerator
         float topLeftX = (width-1) / -2f;
         float topLeftZ = (height-1) / 2f;
 
-        int meshSimplificationIncrement = (levelOfDetail != 0) ? levelOfDetail*2 : 1;
+        int meshSimplificationIncrement = (editorLODPreview != 0) ? editorLODPreview*2 : 1;
         int verticiesPerLine = (width-1)/meshSimplificationIncrement + 1;
 
 
