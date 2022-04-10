@@ -53,7 +53,7 @@ public static class MeshGenerator
                 
                 Vector2 percent = new Vector2((x - meshSimplificationIncrement)/(float)meshSize, (y - meshSimplificationIncrement)/(float)meshSize);
                 float height = heightCurve.Evaluate(heightMap[x, y])*heightMultiplier;
-                Vector3 vertexPosition = new Vector3(topLeftX + percent.x * meshSizeUnSimplified, height, topLeftZ + percent.y * meshSizeUnSimplified);
+                Vector3 vertexPosition = new Vector3(topLeftX + percent.x * meshSizeUnSimplified, height, topLeftZ - percent.y * meshSizeUnSimplified);
                 
                 meshData.AddVertex(vertexPosition, percent, vertexIndex);
 
