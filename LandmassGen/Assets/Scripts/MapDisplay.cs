@@ -17,13 +17,13 @@ public class MapDisplay : MonoBehaviour
         textureRender.transform.localScale = new Vector3(texture.width, 1, texture.height);
     }
 
-    public void DrawMesh(MeshData meshData, Texture2D texture)
+    public void DrawMesh(MeshData meshData)
     {
         meshFilter.gameObject.SetActive(true);
         textureRender.gameObject.SetActive(false);
 
         meshFilter.sharedMesh = meshData.CreateMesh();
-        meshRenderer.sharedMaterial.mainTexture = texture;
+        meshFilter.transform.localScale = Vector3.one * FindObjectOfType<MapGenerator>().terrainData.uniformScale;
     }
 
     public void HideAll()
