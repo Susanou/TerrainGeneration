@@ -254,9 +254,9 @@ public class InfiniteTerrain : MonoBehaviour
     [System.Serializable]
     public struct LODInfo
     {
+        [Range(0, MeshGenerator.numSupportedLODs - 1)]
         public int lod;
         public float visibleDistThreshold;
-        public bool useForCollider;
         public float sqrVisibleDistThreshold
         {
             get{
