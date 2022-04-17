@@ -24,7 +24,7 @@ public class InfiniteTerrain : MonoBehaviour
     int chunksVisibleInViewDst;
 
     Dictionary<Vector2, TerrainChunk> terrainChunkDictionary = new Dictionary<Vector2, TerrainChunk>();
-    static List<TerrainChunk> terrainChunksVisibleLastUpdate = new List<TerrainChunk>();
+    static List<TerrainChunk> visibleTerrainChunks = new List<TerrainChunk>();
 
     void Start() {
         mapGenerator = FindObjectOfType<MapGenerator> ();
@@ -41,7 +41,7 @@ public class InfiniteTerrain : MonoBehaviour
 
         if(viewerPosition != oldViewerPosition)
         {
-            foreach(TerrainChunk chunk in terrainChunksVisibleLastUpdate)
+            foreach(TerrainChunk chunk in visibleTerrainChunks)
             {
                 chunk.UpdateCollisionMesh();
             }
@@ -56,10 +56,13 @@ public class InfiniteTerrain : MonoBehaviour
         
     void UpdateVisibleChunks() {
 
-        for (int i = 0; i < terrainChunksVisibleLastUpdate.Count; i++) {
-            terrainChunksVisibleLastUpdate [i].SetVisible (false);
+        HashSet<Vector2> alreadyUpdatedChunkCoords = new HashSet<Vector2>();
+
+        //prevent indexing errors if chunks are not visible anymore and removed from the list
+        for (int i = visibleTerrainChunks.Count-1; i >= 0 ; i--) {
+            alreadyUpdatedChunkCoords.Add(visibleTerrainChunks[i].coord);
+            visibleTerrainChunks [i].UpdateTerrainChunk();
         }
-        terrainChunksVisibleLastUpdate.Clear ();
             
         int currentChunkCoordX = Mathf.RoundToInt (viewerPosition.x / chunkSize);
         int currentChunkCoordY = Mathf.RoundToInt (viewerPosition.y / chunkSize);
@@ -68,11 +71,14 @@ public class InfiniteTerrain : MonoBehaviour
             for (int xOffset = -chunksVisibleInViewDst; xOffset <= chunksVisibleInViewDst; xOffset++) {
                 Vector2 viewedChunkCoord = new Vector2 (currentChunkCoordX + xOffset, currentChunkCoordY + yOffset);
 
-                if (terrainChunkDictionary.ContainsKey (viewedChunkCoord)) {
+                if(!alreadyUpdatedChunkCoords.Contains(viewedChunkCoord))
+                {
+                    if (terrainChunkDictionary.ContainsKey (viewedChunkCoord)) {
                     terrainChunkDictionary [viewedChunkCoord].UpdateTerrainChunk ();
 
-                } else {
-                    terrainChunkDictionary.Add (viewedChunkCoord, new TerrainChunk (viewedChunkCoord, chunkSize, detailLevels, colliderLODIndex, transform, mapMaterial));
+                    } else {
+                        terrainChunkDictionary.Add (viewedChunkCoord, new TerrainChunk (viewedChunkCoord, chunkSize, detailLevels, colliderLODIndex, transform, mapMaterial));
+                    }
                 }
 
             }
@@ -80,6 +86,8 @@ public class InfiniteTerrain : MonoBehaviour
     }
 
     public class TerrainChunk {
+
+        public Vector2 coord;
 
         GameObject meshObject;
         Vector2 position;
@@ -100,6 +108,7 @@ public class InfiniteTerrain : MonoBehaviour
 
 
         public TerrainChunk(Vector2 coord, int size, LODInfo[] detailLevels, int colliderLODIndex, Transform parent, Material material) {
+            this.coord = coord;
             this.detailLevels = detailLevels;
             this.colliderLODIndex = colliderLODIndex;
 
@@ -145,6 +154,8 @@ public class InfiniteTerrain : MonoBehaviour
             if(mapDataReceived)
             {
                 float viewerDstFromNearestEdge = Mathf.Sqrt(bounds.SqrDistance (viewerPosition));
+
+                bool wasVisible = IsVisible();
                 bool visible = viewerDstFromNearestEdge <= maxViewDst;
 
                 if (visible)
@@ -179,10 +190,23 @@ public class InfiniteTerrain : MonoBehaviour
 
                     }
 
-                    terrainChunksVisibleLastUpdate.Add(this);
+                    visibleTerrainChunks.Add(this);
                 }
 
-                SetVisible (visible);
+                if(wasVisible != visible)
+                {
+
+                    if(visible)
+                    {
+                        visibleTerrainChunks.Add(this);
+                    }
+                    else
+                    {
+                        visibleTerrainChunks.Remove(this);
+                    }    
+                    SetVisible (visible);
+                }
+                    
             }
         }
 
