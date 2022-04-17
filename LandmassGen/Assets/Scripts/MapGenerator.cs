@@ -58,7 +58,14 @@ public class MapGenerator : MonoBehaviour {
 		}
 	}
 
+	void Awake()
+	{
+		textureData.ApplyToMaterial(terrainMaterial);
+		textureData.UpdateMeshHeights(terrainMaterial, terrainData.minHeight, terrainData.maxHeight);
+	}
+
 	public void DrawMapInEditor() {
+		textureData.UpdateMeshHeights(terrainMaterial, terrainData.minHeight, terrainData.maxHeight);
 		MapData mapData = GenerateMapData (Vector2.zero);
 
 		MapDisplay display = FindObjectOfType<MapDisplay> ();
@@ -148,8 +155,6 @@ public class MapGenerator : MonoBehaviour {
 				}
 			}
 		}
-
-		textureData.UpdateMeshHeights(terrainMaterial, terrainData.minHeight, terrainData.maxHeight);
 	
 		return new MapData (noiseMap);
 	}
