@@ -2,15 +2,9 @@ using UnityEngine;
 using System.Collections;
 
 public static class MeshGenerator {
+ 
 
-    public const int numSupportedLODs = 5;
-    public const int numSupportedChunkSizes = 9;
-    public const int numSupportedFlatshadedChunkSizes = 3;
-    public static readonly int[] supportedChunkSizes = {48,72,96,120,144,168,192,216,240};
-    public static readonly int[] supportedFlatshadedChunkSizes = {48,72,96};
-
-	public static MeshData GenerateTerrainMesh(float[,] heightMap, float heightMultiplier, AnimationCurve _heightCurve, int levelOfDetail, bool useFlatShading) {
-		AnimationCurve heightCurve = new AnimationCurve (_heightCurve.keys);
+	public static MeshData GenerateTerrainMesh(float[,] heightMap, MeshSettings meshSettings, int levelOfDetail) {
 
 		int meshSimplificationIncrement = (levelOfDetail == 0)?1:levelOfDetail * 2;
 
@@ -24,7 +18,7 @@ public static class MeshGenerator {
 
 		int verticesPerLine = (meshSize - 1) / meshSimplificationIncrement + 1;
 
-		MeshData meshData = new MeshData (verticesPerLine, useFlatShading);
+		MeshData meshData = new MeshData (verticesPerLine,meshSettings.useFlatShading);
 
 		int[,] vertexIndicesMap = new int[borderedSize,borderedSize];
 		int meshVertexIndex = 0;
@@ -35,11 +29,11 @@ public static class MeshGenerator {
 				bool isBorderVertex = y == 0 || y == borderedSize - 1 || x == 0 || x == borderedSize - 1;
 
 				if (isBorderVertex) {
-					vertexIndicesMap [x, y] = borderVertexIndex--;
-					
+					vertexIndicesMap [x, y] = borderVertexIndex;
+					borderVertexIndex--;
 				} else {
-					vertexIndicesMap [x, y] = meshVertexIndex++;
-					
+					vertexIndicesMap [x, y] = meshVertexIndex;
+					meshVertexIndex++;
 				}
 			}
 		}
@@ -48,12 +42,11 @@ public static class MeshGenerator {
 			for (int x = 0; x < borderedSize; x += meshSimplificationIncrement) {
 				int vertexIndex = vertexIndicesMap [x, y];
 				Vector2 percent = new Vector2 ((x-meshSimplificationIncrement) / (float)meshSize, (y-meshSimplificationIncrement) / (float)meshSize);
-				float height = heightCurve.Evaluate (heightMap [x, y]) * heightMultiplier;
-				Vector3 vertexPosition = new Vector3 (topLeftX + percent.x * meshSizeUnsimplified, height, topLeftZ - percent.y * meshSizeUnsimplified);
+				float height = heightMap [x, y];
+				Vector3 vertexPosition = new Vector3 ((topLeftX + percent.x * meshSizeUnsimplified) * meshSettings.meshScale, height, (topLeftZ - percent.y * meshSizeUnsimplified) * meshSettings.meshScale);
 
 				meshData.AddVertex (vertexPosition, percent, vertexIndex);
 
-                //ignore coordinates on right and bottom edge
 				if (x < borderedSize - 1 && y < borderedSize - 1) {
 					int a = vertexIndicesMap [x, y];
 					int b = vertexIndicesMap [x + meshSimplificationIncrement, y];
@@ -67,7 +60,7 @@ public static class MeshGenerator {
 			}
 		}
 
-		meshData.FinalPass ();
+		meshData.ProcessMesh ();
 
 		return meshData;
 
@@ -179,7 +172,7 @@ public class MeshData {
 		return Vector3.Cross (sideAB, sideAC).normalized;
 	}
 
-	public void FinalPass() {
+	public void ProcessMesh() {
 		if(useFlatShading)
 		{
 			FlatShading();
