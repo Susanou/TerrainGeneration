@@ -49,7 +49,7 @@ MonoBehaviour:
     tintStrength: 0.464
     startHeight: 0.762
     blendStrength: 0.103
-    textureScale: 2.2
+    textureScale: 6.04
   - texture: {fileID: 2800000, guid: 809a4a956e7e6da0394001c32955cfcd, type: 3}
     tint: {r: 1, g: 1, b: 1, a: 0}
     tintStrength: 0.755
