@@ -37,6 +37,7 @@ public class MapPreview : MonoBehaviour
 
 	void OnTextureValuesUpdated()
 	{
+        Debug.Log("Updating textures");
 		textureData.ApplyToMaterial(terrainMaterial);
 	}
 

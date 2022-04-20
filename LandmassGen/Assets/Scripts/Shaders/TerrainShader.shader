@@ -17,8 +17,6 @@ Shader "Custom/TerrainShader"
         // Use shader model 3.0 target, to get nicer looking lighting
         #pragma target 3.0
 
-        sampler2D _MainTex;
-
         const static int maxLayerCount = 8;
         const static float epsilon = 1E-4; //to avoid division by 0
 
