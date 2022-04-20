@@ -13,10 +13,11 @@ MonoBehaviour:
   m_Name: Default Texture
   m_EditorClassIdentifier: 
   autoUpdate: 1
+  useColors: 1
   layers:
   - texture: {fileID: 2800000, guid: 5a44b2d513893c38fb5470481247ce9c, type: 3}
     tint: {r: 0, g: 0.244079, b: 0.8962264, a: 0}
-    tintStrength: 0.75
+    tintStrength: 0.79
     startHeight: 0
     blendStrength: 0.116
     textureScale: 4.15
