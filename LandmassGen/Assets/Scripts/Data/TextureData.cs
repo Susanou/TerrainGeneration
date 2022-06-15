@@ -8,7 +8,7 @@ public class TextureData : UpdatableData {
 	const int textureSize = 512;
 	const TextureFormat textureFormat = TextureFormat.RGB565;
 
-	public bool useColors;
+	public bool useColours;	
 	public Layer[] layers;
 
 	float savedMinHeight;
@@ -17,17 +17,18 @@ public class TextureData : UpdatableData {
 	public void ApplyToMaterial(Material material) {
 		
 		material.SetInt ("layerCount", layers.Length);
-		material.SetColorArray ("baseColors", layers.Select(x => x.tint).ToArray());
+		material.SetColorArray ("baseColours", layers.Select(x => x.tint).ToArray());
 		material.SetFloatArray ("baseStartHeights", layers.Select(x => x.startHeight).ToArray());
 		material.SetFloatArray ("baseBlends", layers.Select(x => x.blendStrength).ToArray());
-		if(useColors)
-		{	
-			material.SetFloatArray ("baseColorStrength", layers.Select(x => 1.0f).ToArray());
+		if (useColours)
+		{
+			material.SetFloatArray ("baseColourStrength", layers.Select(x => 1.0f).ToArray());
 		}
 		else
-		{	
-			material.SetFloatArray ("baseColorStrength", layers.Select(x => x.tintStrength).ToArray());
+		{
+			material.SetFloatArray ("baseColourStrength", layers.Select(x => x.tintStrength).ToArray());
 		}
+			
 		material.SetFloatArray ("baseTextureScales", layers.Select(x => x.textureScale).ToArray());
 		Texture2DArray texturesArray = GenerateTextureArray (layers.Select (x => x.texture).ToArray ());
 		material.SetTexture ("baseTextures", texturesArray);

@@ -2,7 +2,6 @@
 using System.Collections;
 
 [CreateAssetMenu(menuName = "Data/Mesh Data")]
-
 public class MeshSettings : UpdatableData {
 
 	public const int numSupportedLODs = 5;
